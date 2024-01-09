@@ -8,6 +8,7 @@ from django.http import JsonResponse
 import json
 import requests
 from django.shortcuts import redirect
+from rest_framework import status
 
 google_client_id='724370149000-arj17qs8ha255erpk861tidve3i005rp.apps.googleusercontent.com'
 redirect_uri= 'http://127.0.0.1:8000/api-user/v1/auth/google/callback'
@@ -25,10 +26,11 @@ class register(APIView):
 class login(APIView):
     
     def post(self,request):
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        
+        email = request.data.get('email')
+        password = request.data.get('password')
+        print(email, password)
         user = User.objects.filter(email=email).first()
+        print(user,"userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
         if user is None:
             raise AuthenticationFailed('You are not registered on the platform')
         if not user.check_password(password):
@@ -157,21 +159,36 @@ def google_callback(request):
             return JsonResponse({'message': "User not authenticated"})
     return JsonResponse({'message': "User not authenticated"})
 
-# profile creation form
+
 
 class create_profile(APIView):
     def post(self, request):
-        user  = request.POST.get('user')
-        phone = request.POST.get('phone')
-        image = request.POST.get('image')
-        intrests = request.POST.get('intrests')
+        user = request.data.get('user')
+        phone = request.data.get('phone')
+        image_file = request.data.get('image')
+        age = request.data.get('age')
+        gender = request.data.get('gender')
+        interests = request.data.get('interests')
+
         try:
-            userObject = User.objects.filter(email=user).first()
-            userObject.phone = phone
-            userObject.image = image
-            userObject.intrests = intrests
-            userObject.save()
-        except:
-            return Response({"message":"User not found"})
-        return Response({"message":"Profile Created Successfully"})
+            user_object = User.objects.get(email=user)
+            user_object.phone = phone
+            if image_file:
+                user_object.image.save(image_file.name, image_file)
+
+            user_object.age = age
+            user_object.gender = gender
+            user_object.interests = interests
+            user_object.save()
+
+            return Response({"message": "Profile Created Successfully"})
+        except User.DoesNotExist:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class getUser(APIView):
+    def get(self, request,userEmail):
+        userDetails = User.objects.filter(email=userEmail).first()
+        serializer = GetUserSerializer(userDetails)
+        return Response(serializer.data)
+        
         

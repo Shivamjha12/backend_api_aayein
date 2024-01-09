@@ -12,6 +12,7 @@ urlpatterns = [
     path('auth/google/', google_signin, name='google_signin'),
     path('auth/google/callback', google_callback, name='google_callback'),
     # path for profile Creation Form
-    path('profile', create_profile.as_view(),name="create_profile"),
+    path('initprofile', create_profile.as_view(),name="create_profile"),
+    path('getUser/<str:userEmail>',getUser.as_view(),name="getUser"),
     
 ]
