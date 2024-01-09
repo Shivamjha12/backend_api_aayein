@@ -8,6 +8,12 @@ class FriendSerializer(serializers.ModelSerializer):
         # fields = '__all__'
         exclude = ['password']
         
+class GoldCoinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = goldCoin
+        fields = '__all__'
+        # exclude = ['password']
+        
 class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.EmailField(source="sender.email")
     receiver = serializers.EmailField(source="receiver.email")

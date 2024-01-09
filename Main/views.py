@@ -143,6 +143,14 @@ class GetChatHistory(APIView):
 
         except Exception as e:
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class getUserCoins(APIView):
+    
+    def get(self, request, user):
+        coins = goldCoin.objects.filter(user__email=user).first()
+        serializer = GoldCoinSerializer(coins)
+        return Response({"coins": serializer.data})
+        
 
 
 
