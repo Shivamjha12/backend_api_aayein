@@ -135,26 +135,80 @@ def google_callback(request):
             family_name = user_info_json.get('family_name')
             picture_url = user_info_json.get('picture')
             
-            user = User.objects.create(
-                email=email,
-                name=f'{given_name} {family_name}',
-                password=google_id,
-                google_id=google_id,
-                google_image_url=picture_url,
-                is_google=True)
-            user.save()
-            
-            response_data = {
-                'message': 'user created successfully.',
-                'user_info': {
-                    'email': email,
-                    'google_id': google_id,
-                    'given_name': given_name,
-                    'family_name': family_name,
-                    'picture_url': picture_url,
+            userCheck = User.objects.filter(email=email).first()
+            if userCheck is None:
+                user = User.objects.create(
+                    email=email,
+                    name=f'{given_name} {family_name}',
+                    password=google_id,
+                    google_id=google_id,
+                    google_image_url=picture_url,
+                    is_google=True)
+                user.save()
+                
+                emaillogin=email
+                passwordlogin=google_id
+                user = User.objects.filter(email=emaillogin).first()
+                print(user,"userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+                if user is None:
+                    raise AuthenticationFailed('You are not registered on the platform')
+                if not user.check_password(passwordlogin):
+                    raise AuthenticationFailed('password is incorrect')
+                
+                payload = {
+                    'id':user.id,
+                    'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=720),
+                    'iat':datetime.datetime.utcnow()
                 }
-            }
-            return JsonResponse(response_data)
+                token = jwt.encode(payload,'secret',algorithm='HS256')
+                # .decode('utf-8')
+                response = Response()
+                # response.set_cookie(key='jwt',value=token, httponly=True)
+                response.data = {
+                    'jwt':token
+                }
+                
+                return response
+            else:
+                user = User.objects.filter(email=email).first()
+                emaillogin=email
+                passwordlogin=user.google_id
+                user = User.objects.filter(email=emaillogin).first()
+                print(user,"userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+                    ," password ",passwordlogin," ",emaillogin)
+                if user is None:
+                    raise AuthenticationFailed('You are not registered on the platform')
+                if not user.password == passwordlogin:
+                    print(user.password," ",passwordlogin)
+                    raise AuthenticationFailed('password is incorrect')
+                
+                payload = {
+                    'id':user.id,
+                    'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=720),
+                    'iat':datetime.datetime.utcnow()
+                }
+                token = jwt.encode(payload,'secret',algorithm='HS256')
+                # .decode('utf-8')
+                response = Response()
+                # response.set_cookie(key='jwt',value=token, httponly=True)
+                response.data = {'jwt':token}
+                
+                return JsonResponse({'jwt':token})
+            
+            
+            
+            
+            # response_data = {
+            #     'message': 'user created successfully.',
+            #     'user_info': {
+            #         'email': email,
+            #         'google_id': google_id,
+            #         'given_name': given_name,
+            #         'family_name': family_name,
+            #         'picture_url': picture_url,
+            #     }
+            # }
+            # return JsonResponse(response_data)
         else:
             return JsonResponse({'message': "User not authenticated"})
     return JsonResponse({'message': "User not authenticated"})
