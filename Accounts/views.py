@@ -11,7 +11,7 @@ from django.shortcuts import redirect
 from rest_framework import status
 
 google_client_id='724370149000-arj17qs8ha255erpk861tidve3i005rp.apps.googleusercontent.com'
-redirect_uri= 'http://127.0.0.1:8000/api-user/v1/auth/google/callback'
+redirect_uri= 'https://backend-api-8pga.onrender.com/api-user/v1/auth/google/callback'
 google_client_secret='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'
 
 class register(APIView):
@@ -89,7 +89,7 @@ class logout(APIView):
 def google_signin(request):
     google_client_id='724370149000-arj17qs8ha255erpk861tidve3i005rp.apps.googleusercontent.com'
     google_client_secret='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'
-    redirect_uri = 'http://127.0.0.1:8000/api-user/v1/auth/google/callback'
+    redirect_uri = 'https://backend-api-8pga.onrender.com/api-user/v1/auth/google/callback'
 
     # Redirect the user to Google for authorization
     auth_url = (
