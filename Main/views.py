@@ -112,7 +112,7 @@ class SendMessage(APIView):
             sender = User.objects.filter(email=sender_id).first()
             receiver = User.objects.filter(email=receiver_id).first()
 
-            content = request.data.get('content',' ')
+            content = request.data.get('content')
             print(content,"content")
             if not content:
                 return Response({"message": "Message content cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
